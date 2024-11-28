@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+<body>
+    <h1> Gerenciamento de Usuário </h1>
+
+    <div class="form-container">
+        <h2>Adicionar Usuário</h2>
+        <div class="form-group">
+            <label for="name">Nome:</label>
+            <input type="text" id="name" placeholder="Digite o nome do Usuário" />
+        </div>
+      <div class="form-group">
+        <label for="age">Idade:</label>
+        <input type="number" id="age" placeholder="Digite a idade do Usuário" />
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" placeholder="Digite o email do Usuário" />
+      </div>
+      <div class="form-group">
+        <label for="contact">Contato:</label>
+        <input type="text" id="contact" placeholder="Digite o contato do Usuário"/>
+      </div>
+      <button class="add-user-btn" onclick="addUser()">Adicionar usuário</button>
+    </div>
+
+
+    <div class="form-container">
+        <h2>Buscar Usuário por ID</h2>
+        <div class="form-group">
+            <label for="userId"> Id do Usuário</label>
+            <input type="number" id="userId" placeholder="Digite o ID do Usuário"/>
+        </div>
+        <button class="fetch-user-btn" onclick="fetchUserById()">
+            Buscar Usuário
+        </button>
+    </div>
+    <div class="user-details" id="userDetails"></div>
+    <div class="user-list" id="userList">
+        <h2>lista de Usuários</h2>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -11,7 +11,7 @@ const config = {
         }, 
     }, 
     options: { 
-        database: 'Pyetro', // Nome do banco de dados que você quer acessar 
+        database: 'Informaçoes', // Nome do banco de dados que você quer acessar 
         encrypt: false, // Desativar criptografia (pode mudar se necessário)
         port: 1433, // Porta padrão do SQL Server
         trustServerCertificate: true // Necessário para evitar erro de SSL em ambiente local 

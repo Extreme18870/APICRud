@@ -3,7 +3,7 @@ const { Request, TYPES } = require("tedious"); // Importa as classes necessária
 
 // GET
   // Todos
-  exports.getAllusers = (callback) => {
+  exports.getAllUsers = (callback) => {
     const connection = createConnection(); // Cria a conexão com o banco de dados
     connection.on("connect", (err) => {
       if (err) {
@@ -15,9 +15,6 @@ const { Request, TYPES } = require("tedious"); // Importa as classes necessária
           return callback(err, null); // Trata erros de execução da consulta
         }
 
-        if (rowCount === 0) {
-          return callback(null, []); // Retorna um array vazio se não houver registros
-        }
       });
 
       // Evento 'row' para capturar todas as linhas de resultados
@@ -26,8 +23,9 @@ const { Request, TYPES } = require("tedious"); // Importa as classes necessária
         result.push({
             id: columns[0].value,
             name: columns[1].value,
-            email: columns[2].value,
-            contact: columns[3].value,
+            age: columns[2].value,
+            email: columns[3].value,
+            contact: columns[4].value,
         });
       });
 
@@ -40,16 +38,84 @@ const { Request, TYPES } = require("tedious"); // Importa as classes necessária
 
     connection.connect(); // Inicia a conexão
   };
-
-  // CPF
-  exports.getProfessorByCpf = (id, callback) => {
+  exports.createUser = (data, callback) => {
     const connection = createConnection(); // Cria a conexão com o banco de dados
-
     connection.on("connect", (err) => {
       if (err) {
         return callback(err, null); // Trata erros de conexão
       }
+      // Consulta SQL para inserir um novo usuário
+      const query = `INSERT INTO users1 (name,age,email,contact) VALUES (@name,@age,@email, @contact )`;
+      const request = new Request(query, (err) => {
+        if (err) {
+          callback(err); // Chama a função callback com erro se houver falha
+        } else {
+          callback(null, { message: "Aluno inserido com sucesso!" });
+        }
+      });
+      // Adiciona os parâmetros necessários para a inserção
 
+      request.addParameter("name", TYPES.VarChar, data.name);
+      request.addParameter("age", TYPES.Int, data.age);
+      request.addParameter("email", TYPES.VarChar, data.email);
+      request.addParameter("contact", TYPES.VarChar, data.contact);
+      connection.execSql(request); // Executa a consulta
+    });
+    connection.connect(); // Inicia a conexão
+  };
+  // Função para atualizar um usuário existente
+exports.updateUser = (id, data, callback) => {
+    const connection = createConnection(); // Cria a conexão com o banco de dados
+    connection.on("connect", (err) => {
+      if (err) {
+        return callback(err, null); // Trata erros de conexão
+      }
+      // Consulta SQL para atualizar o nome do usuário pelo ID
+      const query = `UPDATE users1 SET name =  @name, age = @age, email = @email, contact = @contact WHERE id = ${id}`;
+      const request = new Request(query, (err) => {
+        if (err) {
+          callback(err); // Chama a função callback com erro se houver falha
+        } else {
+          callback(null, { message: "Usuario atualizado com sucesso!" }); // Retorna uma mensagem desucesso
+        }
+      });
+      request.addParameter("id", TYPES.Int, id);
+      request.addParameter("name", TYPES.VarChar, data.name);
+      request.addParameter("age", TYPES.Int, data.age);
+      request.addParameter("email", TYPES.VarChar, data.email);
+      request.addParameter("contact", TYPES.VarChar, data.contact);
+      connection.execSql(request); // Executa a atualização no banco de dados
+    });
+    connection.connect(); // Inicia a conexão
+  };
+
+  exports.deleteUser = (id, callback) => {
+    const connection = createConnection(); // Cria a conexão com o banco de dados
+    connection.on("connect", (err) => {
+      if (err) {
+        return callback(err, null); // Trata erros de conexão
+      }
+      // Consulta SQL para deletar o usuário pelo ID
+      const query = `DELETE FROM users1 WHERE id = ${id}`;
+      const request = new Request(query, (err) => {
+        if (err) {
+          callback(err); // Chama a função callback com erro se houver falha
+        } else {
+          callback(null, { message: "usuario deletado com sucesso!" }); // Retorna uma mensagem de sucesso
+        }
+      });
+      connection.execSql(request); // Executa a remoção no banco de dados
+    });
+    connection.connect(); // Inicia a conexão
+  };
+  exports.getUserById = (id, callback) => {
+    const connection = createConnection(); // Cria a conexão com o banco de dados
+  
+    connection.on("connect", (err) => {
+      if (err) {
+        return callback(err, null); // Trata erros de conexão
+      }
+  
       // Consulta SQL para buscar um aluno pelo RM
       const query = `SELECT * FROM users1 WHERE id = @id`;
       const request = new Request(query, (err) => {
@@ -57,73 +123,78 @@ const { Request, TYPES } = require("tedious"); // Importa as classes necessária
           return callback(err, null); // Trata erros de execução da consulta
         }
       });
-
+  
       // Adiciona o parâmetro RM
-      request.addParameter("cpf", TYPES.VarChar, cpf);
-
+      request.addParameter("id", TYPES.Int, id);
+  
       // Evento 'row' para capturar a linha de resultado
-      let users= null;
+      let aluno = null;
       request.on("row", (columns) => {
-        professor = {
-            id: columns[0].value,
-            name: columns[1].value,
-            email: columns[2].value,
-            contact: columns[3].value,
-        };
-      });
-
-      // Ao completar a consulta, retorna o aluno encontrado
-      request.on("requestCompleted", () => {
-        callback(null, users); // Retorna o aluno encontrado ou null se não existir
-      });
-
-      connection.execSql(request); // Executa a consulta
-    });
-
-    connection.connect(); // Inicia a conexão
-  };
-
-  // Nome
-  exports.getProfessorByNome = (name, callback) => {
-    const connection = createConnection(); // Cria a conexão com o banco de dados
-
-    connection.on("connect", (err) => {
-      if (err) {
-        return callback(err, null); // Trata erros de conexão
-      }
-
-
-      // Consulta SQL para buscar um aluno pelo nome
-      const query = `SELECT * FROM Professores WHERE name = @name`;
-      const request = new Request(query, (err) => {
-        if (err) {
-          return callback(err, null); // Trata erros de execução da consulta
-        }
-      });
-
-      // Adiciona o parâmetro nome
-      request.addParameter("name", TYPES.VarChar, name);
-
-      // Evento 'row' para capturar a linha de resultado
-      let users = null;
-      request.on("row", (columns) => {
-        users = {
+        aluno = {
           id: columns[0].value,
           name: columns[1].value,
-          email: columns[2].value,
-          contact: columns[3].value,
+          age: columns[2].value,
+          email: columns[3].value,
+          contact: columns[4].value,
         };
       });
-
+  
       // Ao completar a consulta, retorna o aluno encontrado
       request.on("requestCompleted", () => {
-        callback(null, users); // Retorna o aluno encontrado ou null se não existir
+        callback(null, aluno); // Retorna o aluno encontrado ou null se não existir
       });
-
+  
       connection.execSql(request); // Executa a consulta
     });
-
+  
     connection.connect(); // Inicia a conexão
   };
 
-//.
+  exports.getUserByName = (name, callback) => {
+    const connection = createConnection(); // Cria a conexão com o banco de dados
+  
+    connection.on("connect", (err) => {
+      if (err) 
+        return callback(err, null); // Trata erros de conexão
+      
+  
+      // Consulta SQL para buscar um aluno pelo RM
+      const query = `SELECT * FROM users1 WHERE nome = @name`;
+      const request = new Request(query, (err) => {
+        if (err) 
+          return callback(err, null); // Trata erros de execução da consulta
+        
+      });
+  
+      // Adiciona o parâmetro RM
+      request.addParameter("name", TYPES.VarChar, name);
+  
+      // Evento 'row' para capturar a linha de resultado
+      let aluno = null;
+      request.on("row", (columns) => {
+        aluno = {
+            id: columns[0].value,
+            name: columns[1].value,
+            age: columns[2].value,
+            email: columns[3].value,
+            contact: columns[4].value,
+        };
+      });
+  
+      // Ao completar a consulta, retorna o aluno encontrado
+      request.on("requestCompleted", () => {
+        callback(null, Informaçoes); // Retorna o aluno encontrado ou null se não existir
+      });
+  
+      connection.execSql(request); // Executa a consulta
+    });
+  
+    connection.connect(); // Inicia a conexão
+  };
+  
+  
+  
+
+  
+
+  
